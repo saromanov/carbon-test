@@ -16,8 +16,6 @@ class Statistics(db.Model):
     def __init__(self, cpu_load):
         self.cpu_load = cpu_load
         self.datetime = datetime.datetime.utcnow()
-    def __repr__(self):
-        return '<ID {0}>'.format(self.id)
 
 def aggregate(func):
     '''

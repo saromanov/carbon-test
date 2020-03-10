@@ -2,16 +2,26 @@
 <html>
   <head>
     <title>Flask Template Example</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
   <body>
-    <div class="container">
+    <div>
       <p>Maximim CPU load: {{max_load}}</p>
       <p>Minimum CPU load: {{min_load}}</p>
       <p>Average CPU load: {{avg_load}}</p>
       <p>Maximim CPU load for last 100 records: {{max_100_load}}</p>
       <p>Minimum CPU load for last 100 records: {{min_100_load}}</p>
       <p>Average CPU load for last 100 records: {{avg_100_load}}</p>
+    </div>
+    <div>
+        <table>
+            <thead><tr><th>CPU load</th><th>time</th></tr></thead>
+            {% for item in records %}
+            <tr>
+               <td>{{item.cpu_load}}</td>
+               <td>{{item.datetime}}</td>
+            </tr>
+            {% endfor %}
+        </table>
     </div>
   </body>
 </html>
