@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import func
+from sqlalchemy import func, desc
 import datetime
 
 app = Flask(__name__, template_folder="templates")
@@ -19,14 +19,30 @@ class Statistics(db.Model):
     def __repr__(self):
         return '<ID {0}>'.format(self.id)
 
+def aggregate(func):
+    '''
+    general function for aggregation of results
+    '''
+    return db.session.query(Statistics, func(Statistics.cpu_load)).all()
+
 @app.route('/')
 def home():
-    last_records = Statistics.query.order_by(Statistics.id).limit(100).all()
-    min_data = db.session.query(Statistics, func.min(Statistics.cpu_load)).all()
-    max_data = db.session.query(Statistics, func.max(Statistics.cpu_load)).all()
-    avg_data = db.session.query(Statistics, func.avg(Statistics.cpu_load)).all()
-    print(avg_data)
-    return render_template('main.html', min_load=min_data[0][1], max_load=max_data[0][1], avg_load=avg_data[0][1])
+    last_records = Statistics.query.order_by(desc(Statistics.id)).limit(100).all()
+    min_data = aggregate(func.min)
+    max_data = aggregate(func.max)
+    avg_data = aggregate(func.avg)
+
+    last_100_min = db.session.query(Statistics, func.min(Statistics.cpu_load)).order_by(desc(Statistics.id)).limit(5).all()
+    last_100_max = db.session.query(Statistics, func.max(Statistics.cpu_load)).order_by(desc(Statistics.id)).limit(5).all()
+    last_100_avg = db.session.query(Statistics, func.avg(Statistics.cpu_load)).order_by(desc(Statistics.id)).limit(5).all()
+    return render_template('main.html',
+    records=last_records,\
+    min_load=min_data[0][1], \
+    max_load=max_data[0][1], \
+    avg_load=avg_data[0][1], \
+    min_100_load = last_100_min[0][1],\
+    max_100_load = last_100_max[0][1],\
+    avg_100_load = last_100_avg[0][1])
 
 @app.route('/data', methods=['POST'])
 def insert_data():
